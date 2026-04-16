@@ -62,6 +62,7 @@ class DeviceController(threading.Thread):
         self._is_run = False
         self._available = False
         self._previous_heartbeat: float = 0.0
+        self._pending_poll_location: Optional[int] = None
         self.name = f"MideaConnection-{device_id}"
 
     @property
@@ -87,11 +88,11 @@ class DeviceController(threading.Thread):
     def register_update(self, update: Callable[[dict[str, Any]], None]) -> None:
         self._updates.append(update)
 
-    def update_all(self, status: dict[str, Any]) -> None:
+    def update_all(self, status: dict[str, Any], poll_location: Optional[int] = None) -> None:
         _LOGGER.debug("[%s] Status update: %s", self._device_id, status)
         for update in self._updates:
             try:
-                update(status)
+                update(status, poll_location=poll_location)
             except Exception as e:
                 _LOGGER.error("[%s] Error in update callback: %s", self._device_id, e)
 
@@ -223,13 +224,22 @@ class DeviceController(threading.Thread):
                             if status:
                                 device_type_hex = hex(self._codec._device_type) if hasattr(self._codec, '_device_type') else 'unknown'
                                 _LOGGER.debug("[DeviceType:%s] Received status at %.3f: %s", device_type_hex, receive_time, status)
-                                self.update_all(status)
+                                poll_location = self._pending_poll_location
+                                self._pending_poll_location = None
+                                self.update_all(status, poll_location=poll_location)
             return True
         except Exception as e:
             _LOGGER.error("[%s] Error parsing message: %s", self._device_id, e)
             return False
 
     def refresh_status(self, query: Optional[dict] = None) -> None:
+        query_hex = self._codec.build_query(query)
+        if query_hex:
+            self._send_message(query_hex, query=True)
+
+    def send_poll_query(self, location: int) -> None:
+        self._pending_poll_location = location
+        query = {"query_type": "db", "db_location": location}
         query_hex = self._codec.build_query(query)
         if query_hex:
             self._send_message(query_hex, query=True)
@@ -425,9 +435,14 @@ class MideaDevice:
         self._control_timeout = 5.0
         self._control_hold = 5.0 if self._centralized else 1.0
         self._callbacks = []
+        self._poll_thread: Optional[threading.Thread] = None
+        self._poll_run = False
 
         # Register controller update callback
         self._controller.register_update(self._on_device_update)
+
+        if device_type == 0xD9:
+            self._start_poll_thread()
 
     @property
     def device_id(self):
@@ -454,12 +469,41 @@ class MideaDevice:
         self._controller.open()
 
     def close(self):
+        self._stop_poll_thread()
         self._controller.close()
+
+    def _start_poll_thread(self):
+        if self._poll_thread is not None:
+            return
+        self._poll_run = True
+        self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
+        self._poll_thread.start()
+
+    def _stop_poll_thread(self):
+        self._poll_run = False
+        if self._poll_thread is not None:
+            self._poll_thread.join(timeout=2.0)
+            self._poll_thread = None
+
+    def _poll_loop(self):
+        while self._poll_run:
+            if self._available and self._controller.connected:
+                try:
+                    self._controller.send_poll_query(1)
+                    time.sleep(1.0)
+                    if not self._poll_run:
+                        break
+                    self._controller.send_poll_query(2)
+                    time.sleep(1.0)
+                except Exception as e:
+                    pass
+            else:
+                time.sleep(1.0)
 
     def register_update(self, callback):
         self._callbacks.append(callback)
 
-    def _on_device_update(self, status: dict):
+    def _on_device_update(self, status: dict, poll_location: Optional[int] = None):
         """Handle updates from the controller."""
         notify = False
         if "available" in status:
@@ -486,7 +530,76 @@ class MideaDevice:
             self._pending_unavailable = False
             self._available = True
 
-            return
+        if self._device_type == 0xD9:
+            data_type = status.get('data_type')
+            db_position = status.get('db_position')
+
+            if data_type == '03db':
+                db_location = status.get("db_location")
+                if db_location not in [1, 2]:
+                    return
+                suffix = "_l" if db_location == 1 else "_r"
+                poll_keys = [
+                    "db_detergent_needed", "db_remain_time", "db_progress", "db_running_status",
+                    "db_error_code"
+                ]
+                if poll_location is None:
+                    new_data = self._data.copy()
+                    for key, value in status.items():
+                        if key not in ['data_type', 'db_location', 'bucket', 'category', 'version']:
+                            if key in poll_keys:
+                                new_data[key + suffix] = value
+                            if key not in new_data:
+                                new_data[key] = value
+                    if self._logic_handler.apply_special_handling_for_poll(new_data, suffix, status):
+                        self._data = new_data
+                        self._notify_update()
+                else:
+                    new_data = self._data.copy()
+                    updated_keys = []
+                    for key in poll_keys:
+                        if key in status:
+                            new_data[key + suffix] = status[key]
+                            updated_keys.append(key + suffix)
+                    if self._logic_handler.apply_special_handling_for_poll(new_data, suffix, status):
+                        self._data = new_data
+                        if updated_keys:
+                            self._notify_update()
+                return
+
+            if poll_location is not None:
+                if "db_location" not in status:
+                    return
+                actual_location = status.get("db_location")
+                if actual_location not in [1, 2]:
+                    return
+                if actual_location != poll_location:
+                    return
+                suffix = "_l" if actual_location == 1 else "_r"
+                poll_keys = [
+                    "db_detergent_needed", "db_remain_time", "db_progress", "db_running_status",
+                    "db_error_code"
+                ]
+                new_data = self._data.copy()
+                updated_keys = []
+                for key in poll_keys:
+                    if key in status:
+                        new_data[key + suffix] = status[key]
+                        updated_keys.append(key + suffix)
+                if self._logic_handler.apply_special_handling_for_poll(new_data, suffix, status):
+                    self._data = new_data
+                    if updated_keys:
+                        self._notify_update()
+                return
+
+            if data_type in ['04db', '02db']:
+                if db_position is None:
+                    if 'db_power' not in status:
+                        return
+                elif db_position != 1:
+                    return
+            else:
+                return
 
         # Merge with existing data
         new_data = self._data.copy()
