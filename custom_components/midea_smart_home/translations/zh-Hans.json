@@ -139,6 +139,36 @@
       },
       "water_output_switch": {
         "name": "龙头出水"
+      },
+      "lock": {
+        "name": "整机童锁"
+      },
+      "dry_fire_protection": {
+        "name": "整机干烧保护"
+      },
+      "gas_leakage_alarm": {
+        "name": "燃气泄漏预警"
+      },
+      "is_error_flag": {
+        "name": "故障指示"
+      },
+      "left_power": {
+        "name": "左灶头点火"
+      },
+      "left_lock": {
+        "name": "左灶头童锁"
+      },
+      "left_dry_fire_protection": {
+        "name": "左灶头干烧保护"
+      },
+      "right_power": {
+        "name": "右灶头点火"
+      },
+      "right_lock": {
+        "name": "右灶头童锁"
+      },
+      "right_dry_fire_protection": {
+        "name": "右灶头干烧保护"
       }
     },
     "button": {
@@ -621,6 +651,34 @@
           "light_toggle": "开关灯",
           "power_and_speed": "开关机+调风速",
           "power_toggle": "开关机"
+        }
+      },
+      "lock_control": {
+        "name": "整机童锁控制",
+        "state": {
+          "unlock": "解锁",
+          "lock": "上锁"
+        }
+      },
+      "dry_fire_protection_control": {
+        "name": "整机干烧保护控制",
+        "state": {
+          "off": "关闭",
+          "on": "开启"
+        }
+      },
+      "left_burner_command": {
+        "name": "左灶头控制",
+        "state": {
+          "none": "请选择操作",
+          "off": "关闭火焰"
+        }
+      },
+      "right_burner_command": {
+        "name": "右灶头控制",
+        "state": {
+          "none": "请选择操作",
+          "off": "关闭火焰"
         }
       },
       "heat_start": {
@@ -1162,6 +1220,75 @@
       },
       "battery_percent": {
         "name": "电池电量"
+      },
+      "version": {
+        "name": "协议版本"
+      },
+      "error_type": {
+        "name": "故障类型"
+      },
+      "error_eq": {
+        "name": "故障部位"
+      },
+      "error_code": {
+        "name": "故障码"
+      },
+      "light_lampblack_mode": {
+        "name": "联动油烟机档位"
+      },
+      "gas_leakage_code": {
+        "name": "燃气泄漏原始码"
+      },
+      "is_error": {
+        "name": "故障标志码"
+      },
+      "left_status": {
+        "name": "左灶头状态"
+      },
+      "left_cookmode": {
+        "name": "左灶头模式"
+      },
+      "left_gear": {
+        "name": "左灶头火力"
+      },
+      "left_work_time": {
+        "name": "左灶头已工作"
+      },
+      "left_target_time": {
+        "name": "左灶头目标时长"
+      },
+      "left_rest_time": {
+        "name": "左灶头剩余时长"
+      },
+      "left_current_temperature": {
+        "name": "左灶头当前温度"
+      },
+      "left_target_temperature": {
+        "name": "左灶头目标温度"
+      },
+      "right_status": {
+        "name": "右灶头状态"
+      },
+      "right_cookmode": {
+        "name": "右灶头模式"
+      },
+      "right_gear": {
+        "name": "右灶头火力"
+      },
+      "right_work_time": {
+        "name": "右灶头已工作"
+      },
+      "right_target_time": {
+        "name": "右灶头目标时长"
+      },
+      "right_rest_time": {
+        "name": "右灶头剩余时长"
+      },
+      "right_current_temperature": {
+        "name": "右灶头当前温度"
+      },
+      "right_target_temperature": {
+        "name": "右灶头目标温度"
       },
       "bottom_temperature": {
         "name": "底部温度"

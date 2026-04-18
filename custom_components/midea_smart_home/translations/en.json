@@ -139,6 +139,36 @@
       },
       "water_output_switch": {
         "name": "Tap Water"
+      },
+      "lock": {
+        "name": "Child Lock"
+      },
+      "dry_fire_protection": {
+        "name": "Dry Fire Protection"
+      },
+      "gas_leakage_alarm": {
+        "name": "Gas Leakage Alarm"
+      },
+      "is_error_flag": {
+        "name": "Error Indicator"
+      },
+      "left_power": {
+        "name": "Left Burner Ignition"
+      },
+      "left_lock": {
+        "name": "Left Burner Lock"
+      },
+      "left_dry_fire_protection": {
+        "name": "Left Burner Dry Fire Protection"
+      },
+      "right_power": {
+        "name": "Right Burner Ignition"
+      },
+      "right_lock": {
+        "name": "Right Burner Lock"
+      },
+      "right_dry_fire_protection": {
+        "name": "Right Burner Dry Fire Protection"
       }
     },
     "button": {
@@ -615,6 +645,34 @@
           "light_toggle": "Light Toggle",
           "power_and_speed": "Power & Speed",
           "power_toggle": "Power Toggle"
+        }
+      },
+      "lock_control": {
+        "name": "Child Lock Control",
+        "state": {
+          "unlock": "Unlock",
+          "lock": "Lock"
+        }
+      },
+      "dry_fire_protection_control": {
+        "name": "Dry Fire Protection Control",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "left_burner_command": {
+        "name": "Left Burner Control",
+        "state": {
+          "none": "Select Operation",
+          "off": "Turn Off"
+        }
+      },
+      "right_burner_command": {
+        "name": "Right Burner Control",
+        "state": {
+          "none": "Select Operation",
+          "off": "Turn Off"
         }
       },
       "heat_start": {
@@ -1150,6 +1208,75 @@
       },
       "battery_percent": {
         "name": "Battery Level"
+      },
+      "version": {
+        "name": "Protocol Version"
+      },
+      "error_type": {
+        "name": "Error Type"
+      },
+      "error_eq": {
+        "name": "Error Location"
+      },
+      "error_code": {
+        "name": "Error Code"
+      },
+      "light_lampblack_mode": {
+        "name": "Linked Hood Gear"
+      },
+      "gas_leakage_code": {
+        "name": "Gas Leakage Raw Code"
+      },
+      "is_error": {
+        "name": "Error Flag"
+      },
+      "left_status": {
+        "name": "Left Burner Status"
+      },
+      "left_cookmode": {
+        "name": "Left Burner Mode"
+      },
+      "left_gear": {
+        "name": "Left Burner Fire Level"
+      },
+      "left_work_time": {
+        "name": "Left Burner Working Time"
+      },
+      "left_target_time": {
+        "name": "Left Burner Target Time"
+      },
+      "left_rest_time": {
+        "name": "Left Burner Remaining Time"
+      },
+      "left_current_temperature": {
+        "name": "Left Burner Current Temperature"
+      },
+      "left_target_temperature": {
+        "name": "Left Burner Target Temperature"
+      },
+      "right_status": {
+        "name": "Right Burner Status"
+      },
+      "right_cookmode": {
+        "name": "Right Burner Mode"
+      },
+      "right_gear": {
+        "name": "Right Burner Fire Level"
+      },
+      "right_work_time": {
+        "name": "Right Burner Working Time"
+      },
+      "right_target_time": {
+        "name": "Right Burner Target Time"
+      },
+      "right_rest_time": {
+        "name": "Right Burner Remaining Time"
+      },
+      "right_current_temperature": {
+        "name": "Right Burner Current Temperature"
+      },
+      "right_target_temperature": {
+        "name": "Right Burner Target Temperature"
       },
       "bottom_temperature": {
         "name": "Bottom Temperature"
